@@ -34,9 +34,9 @@ public class WordToPdf(ILogger<WordToPdf> logger)
             }
 
             // get the word file
-            var textFile = req.Form.Files[0];
+            var wordFile = req.Form.Files[0];
             using var wordStream = new MemoryStream();
-            await textFile.CopyToAsync(wordStream);
+            await wordFile.CopyToAsync(wordStream);
             wordStream.Position = 0;
 
             // create an word document with docx extensions
