@@ -5,17 +5,17 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using PdfConversion.Models;
-using Syncfusion.Drawing;
 using Syncfusion.Pdf;
-using Syncfusion.Pdf.Graphics;
+using Syncfusion.Presentation;
+using Syncfusion.PresentationRenderer;
 
 namespace PdfConversion;
 
-public class ImageToPdf(ILogger<ImageToPdf> logger)
+public class PowerPointToPdf(ILogger<PowerPointToPdf> logger)
 {
-    private readonly ILogger<ImageToPdf> _logger = logger;
+    private readonly ILogger<PowerPointToPdf> _logger = logger;
 
-    [Function("ImageToPdf")]
+    [Function("PowerPointToPdf")]
     [OpenApiOperation()]
     [OpenApiRequestBody(contentType: "multipart/form-data", bodyType: typeof(MultiPartFormDataModel), Required = true)]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/pdf", bodyType: typeof(byte[]))]
@@ -25,26 +25,26 @@ public class ImageToPdf(ILogger<ImageToPdf> logger)
     {
         try
         {
-            _logger.LogInformation("C# HTTP trigger ImageToPdf function processed a request.");
+            _logger.LogInformation("C# HTTP trigger PowerPointToPdf function processed a request.");
 
-            // check for image file is exists or not
+            // check for powerPoint file is exists or not
             if (req.Form == null || req.Form.Files.Count == 0)
             {
-                return new BadRequestObjectResult("Image file is missing. Please add and try again!");
+                return new BadRequestObjectResult("PowerPoint file is missing. Please add and try again!");
             }
 
-            // get the image file
-            var imageFile = req.Form.Files[0];
-            using var imageStream = new MemoryStream();
-            await imageFile.CopyToAsync(imageStream);
-            imageStream.Position = 0;
+            // get the powerPoint file
+            var powerPointFile = req.Form.Files[0];
+            using var powerPointStream = new MemoryStream();
+            await powerPointFile.CopyToAsync(powerPointStream);
+            powerPointStream.Position = 0;
 
-            using var pdfDocument = new PdfDocument();
-            PdfPage page = pdfDocument.Pages.Add();
-            SizeF pageSize = page.GetClientSize();
-
-            using var image = new PdfBitmap(imageStream);
-            page.Graphics.DrawImage(image, new RectangleF(0, 0, pageSize.Width, pageSize.Height));
+            using IPresentation presentation = Presentation.Open(powerPointStream);
+            var settings = new PresentationToPdfConverterSettings()
+            {
+                ShowHiddenSlides = true,
+            };
+            PdfDocument pdfDocument = PresentationToPdfConverter.Convert(presentation, settings);
 
             using var outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
