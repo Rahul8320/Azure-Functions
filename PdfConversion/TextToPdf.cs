@@ -8,7 +8,7 @@ using Microsoft.OpenApi.Models;
 using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 
-namespace TextToPdf;
+namespace PdfConversion;
 
 public class TextToPdf(ILogger<TextToPdf> logger)
 {
@@ -17,11 +17,11 @@ public class TextToPdf(ILogger<TextToPdf> logger)
     [Function("TextToPdf")]
     [OpenApiOperation()]
     [OpenApiParameter(name: "Text", Required = true, In = ParameterLocation.Query, Type = typeof(string))]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/pdf", bodyType: typeof(string))]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/pdf", bodyType: typeof(byte[]))]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/text", bodyType: typeof(string))]
-    public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
+    public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
-        _logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("C# HTTP trigger 'TextToPdf' function processed a request.");
 
         // Get the query parameter
         var text = req.Query["text"];
